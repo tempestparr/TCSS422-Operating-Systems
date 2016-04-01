@@ -16,7 +16,6 @@ struct pcb {
 
 //#define DEFAULT_PID 0Lu
 #define DEFAULT_STATE new
-#define DEFAULT_PRIORITY 0
 #define DEFAULT_PC 0Lu
 
 
@@ -29,6 +28,7 @@ struct pcb {
 PCB_p PCB_construct (int *ptr_error)
 {
   PCB_p this = (PCB_p) malloc(sizeof(PCB));
+  
   
   int error = ((!this) * 4) || PCB_init(this);
   if(ptr_error != NULL)
@@ -61,11 +61,12 @@ int PCB_init (PCB_p this)
 {
   static unsigned long pidCounter = 0;
   int error = this == NULL;
+  
   if(!error)
   {
     this->pid = pidCounter++;
     this->pc = DEFAULT_PC;
-    this->priority = DEFAULT_PRIORITY;
+    this->priority = rand() & 0x1F;
     this->state = DEFAULT_STATE;
   }
   return error;
