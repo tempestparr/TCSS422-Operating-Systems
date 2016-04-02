@@ -13,6 +13,8 @@
 
 #ifndef PCB_H
 #define PCB_H
+
+#include <stdio.h>
 // all #defines
 #define NUMREGS 16
 // to shut netbeans up

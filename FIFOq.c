@@ -5,161 +5,153 @@
  */
 #include "FIFOq.h"
 
-
-FIFOq_p FIFOq_construct(int * ptr_error)
-{
-    FIFOq_p this = (FIFOq_p) malloc(sizeof(struct FIFOq));
-    int error = ((!this) * 4) || FIFOq_init(this);
-    if(ptr_error != NULL)
-    {
-        *ptr_error = error;
-    }
-    if (error)
-    {
-        this->size = NULL;
-        this->head = NULL;
-    }
-    return this;
-
-}
-
-int FIFOq_destruct (FIFOq_p this)
-{
-  int error = this == NULL;
-  if (!error)
-  {
-      Node_p node = this->head;
-      while (this->head != NULL)
-      {
-          node = this->head->next_node;
-        Node_destruct(this->head);
-        this->head = node;
-      }
-    free(this);
-    this = NULL;
-  }
-  return error;
-}
-
-
-int FIFOq_init (FIFOq_p this)
-{
-  int error = this == NULL;
-  if (!error)
-  {
-    this->size = 0;
-    this->head = NULL;
-  }
-  return error;
-
-}// sets default values for member data
-
-
-int FIFOq_is_empty(FIFOq_p this)
-{
-  int error = this == NULL;
-  if (!error)
-  {
-    return this->head == NULL;
-  }
-  return error * -1;  
-}
-
-int FIFOq_enqueue(FIFOq_p this, Node_p next)
+int is_null(void *this, int *ptr_error)
 {
     int error = this == NULL;
-  if (!error)
-  {
-      if (this->head == NULL)
-      {
-          if (!next->pos) next->pos = 1;
-          this->head = next;
-      }
-      else
-      {
-          int pos = 2;
-          Node_p node = this->head;
-          while (node->next_node != NULL)
+    if (ptr_error != NULL)
+        *ptr_error = error + *ptr_error;
+    return ptr_error == NULL ? error : error + *ptr_error;
+}
+
+FIFOq_p FIFOq_construct(int *error)
+{
+    FIFOq_p this = (FIFOq_p) malloc(sizeof(struct FIFOq));
+    int init_error = ((!this) * 4) || FIFOq_init(this, error);
+    if (init_error && !is_null(this, error))
+        FIFOq_destruct(this, error);
+    return this;
+}
+
+void FIFOq_destruct (FIFOq_p this, int *error)
+{
+    if (!is_null(this, error))
+    {
+        Node_p node = this->head;
+        while (this->head != NULL)
         {
-              node = node->next_node;
-              pos++;
+            node = this->head->next_node;
+            Node_destruct(this->head);
+            this->head = node;
         }
-          if (!next->pos) next->pos = pos;
-        node->next_node = next;
-      }
-      this->size++;
-  }
-  return error;
+        free(this);
+        this = NULL;
+        if (this == NULL) printf("NULLLL!!!");
+    }
 }
 
-PCB_p FIFOq_dequeue(FIFOq_p this, int * ptr_error)
+
+int FIFOq_init (FIFOq_p this, int *error)
 {
-  int error = this == NULL || this->head == NULL;
-  if (ptr_error != NULL)
-  {
-    *ptr_error = error;
-  }
-  if (!error)
-  {
-      Node_p node = this->head;
-      this->head = this->head->next_node;
-      this->size--;
-      PCB_p pcb = node->data;
-      Node_destruct(node);
-      return pcb;
-  }
-  return NULL;
+    if (!is_null(this, error))
+    {
+        this->size = 0;
+        this->head = NULL;
+    }
+    return error == NULL ? 0 : *error;
 }
 
-char * FIFOq_toString (FIFOq_p this, char *str, int * ptr_error)
+
+int FIFOq_is_empty(FIFOq_p this, int *error)
 {
-     int error = this == NULL;
-     if (!error)
-     {
-         sprintf(str + strlen(str), "Q:Count=%d: ", this->size);
-         if (this->head != NULL)
-         {
-             sprintf(str + strlen(str), " P%d-", this->head->pos);             
-             Node_p node = this->head->next_node;
-             while (node != NULL)
-             {
-               sprintf(str + strlen(str), ">P%d-", node->pos);
-               node = node->next_node;
+    if (!is_null(this, error))
+    {
+        return this->head == NULL;
+    }
+    return error == NULL ? 0 : *error;
+}
+
+void FIFOq_enqueue(FIFOq_p this, Node_p next, int *error)
+{
+    if (!is_null(this, error))
+    {
+        if (this->head == NULL)
+        {
+            if (next != NULL && !next->pos) next->pos = 1;
+            this->head = next;
+        }
+        else
+        {
+            int pos = 2;
+            Node_p node = this->head;
+            while (node->next_node != NULL)
+            {
+                node = node->next_node;
+                pos++;
             }
-            sprintf(str + strlen(str), "*");
-         }
-         return str;
-     }
-     else return 0;
+            if (next != NULL && !next->pos)
+                next->pos = pos;
+            node->next_node = next;
+        }
+        this->size++;
+    }
 }
 
-Node_p Node_construct (PCB_p data, Node_p next_node, int * ptr_error)
+PCB_p FIFOq_dequeue(FIFOq_p this, int *error)
 {
-  Node_p this = (Node_p) malloc(sizeof(struct Node_type));
-  int error = ((!this) * 4) || Node_init(this);
-  if(ptr_error != NULL)
-  {
-      *ptr_error = error;
-  }
-  if (!error)
-  {
-      this->pos = 0;
-    this->data = data;
-    this->next_node = next_node;
-  }
-  return this;
+    if (!is_null(this, error) && !is_null(this->head, error))
+    {
+        Node_p node = this->head;
+        this->head = this->head->next_node;
+        this->size--;
+        PCB_p pcb = node->data;
+        Node_destruct(node);
+        return pcb;
+    }
+    return NULL;
 }
 
-int Node_init (Node_p this)
+PCB_p FIFOq_last_pcb(FIFOq_p this, int *error)
 {
-  int error = this == NULL;
-  if (!error)
-  {
-      this->pos = NULL;
-    this->data = NULL;
-    this->next_node = NULL;
-  }
-  return error;
+    if (!is_null(this, error) && !is_null(this->head, error))
+    {
+        Node_p node = this->head;
+        while (node->next_node != NULL)
+            node = node->next_node;
+        return node->data;
+    }
+    return NULL;
+}
+
+char * FIFOq_toString (FIFOq_p this, char *str, int stz, int *error)
+{
+    if (!is_null(this, error) && !is_null(str, error))
+    {
+        snprintf(str, stz, "Q:Count=%d:", this->size);
+        if (this->head != NULL)
+        {
+//            snprintf(str + strlen(str), stz, "P%d-", this->head->pos);             
+//            Node_p node = this->head->next_node;
+            Node_p node = this->head;
+            while (node != NULL)
+            {
+                snprintf(str + strlen(str), stz, "%cP%d-", node == this->head? ' ' : '>', node->pos);
+                node = node->next_node;
+            }
+            snprintf(str + strlen(str), stz, "*");
+        }
+        return str;
+    }
+    else return 0;
+}
+
+Node_p Node_construct (PCB_p data, Node_p next_node, int *error)
+{
+    Node_p this = (Node_p) malloc(sizeof(struct Node_type));
+    int init_error = ((!this) * 4) || Node_init(this, data, next_node, error);
+    if (init_error && !is_null(this, error))
+        Node_destruct(this);
+    return this;
+}
+
+int Node_init (Node_p this, PCB_p data, Node_p next_node, int *error)
+{
+    if (!is_null(this, error))
+    {
+        this->pos = 0;
+        this->data = data;
+        this->next_node = next_node;
+    }
+    return error == NULL ? 0 : *error;
 }
 
 int Node_destruct (Node_p this)
