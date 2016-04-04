@@ -23,7 +23,7 @@
 #define true true_
 #define false false_
 
-#define PRIORITIES_TOTAL 32
+#define PRIORITIES_TOTAL 16
 #define LOWEST_PRIORITY (PRIORITIES_TOTAL - 1)
 
 typedef enum {false, true} bool;
