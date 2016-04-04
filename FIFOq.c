@@ -61,26 +61,34 @@ int FIFOq_is_empty(FIFOq_p this, int *error)
 
 void FIFOq_enqueue(FIFOq_p this, Node_p next, int *error)
 {
-    if (!is_null(this, error))
+    if (!is_null(this, error) && !is_null(next, error))
     {
         if (this->head == NULL)
         {
-            if (next != NULL && !next->pos) next->pos = 1;
+            if (!next->pos)
+                next->pos = 1;
             this->head = next;
+            this->tail = this->head;
         }
         else
         {
-            int pos = 2;
-            Node_p node = this->head;
-            while (node->next_node != NULL)
-            {
-                node = node->next_node;
-                pos++;
-            }
-            if (next != NULL && !next->pos)
-                next->pos = pos;
-            node->next_node = next;
+            if (!next->pos)
+                next->pos = this->tail->pos + 1;
+            this->tail->next_node = next;
+            this->tail = next;
         }
+            //old O(n) time for tail
+//            int pos = 2;
+//            Node_p node = this->head;
+//            while (node->next_node != NULL)
+//            {
+//                node = node->next_node;
+//                pos++;
+//            }
+//            if (next != NULL && !next->pos)
+//                next->pos = pos;
+//            node->next_node = next;
+//        }
         this->size++;
     }
 }
@@ -91,6 +99,8 @@ PCB_p FIFOq_dequeue(FIFOq_p this, int *error)
     {
         Node_p node = this->head;
         this->head = this->head->next_node;
+        if (this->head == NULL)
+            this->tail = NULL;
         this->size--;
         PCB_p pcb = node->data;
         Node_destruct(node);
@@ -99,17 +109,17 @@ PCB_p FIFOq_dequeue(FIFOq_p this, int *error)
     return NULL;
 }
 
-PCB_p FIFOq_last_pcb(FIFOq_p this, int *error)
-{
-    if (!is_null(this, error) && !is_null(this->head, error))
-    {
-        Node_p node = this->head;
-        while (node->next_node != NULL)
-            node = node->next_node;
-        return node->data;
-    }
-    return NULL;
-}
+//PCB_p FIFOq_last_pcb(FIFOq_p this, int *error)
+//{
+//    if (!is_null(this, error) && !is_null(this->head, error))
+//    {
+//        Node_p node = this->head;
+//        while (node->next_node != NULL)
+//            node = node->next_node;
+//        return node->data;
+//    }
+//    return NULL;
+//}
 
 char * FIFOq_toString(FIFOq_p this, char *str, int *stz, int *error)
 {
