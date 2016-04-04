@@ -7,6 +7,13 @@
 #include <string.h>
 #include "pcb.h"
 
+struct pcb {
+  unsigned long pid;        // process ID #, a unique number
+  enum state_type state;    // process state (running, waiting, etc.)
+  unsigned short priority;  //priorities 0=highest, 15=lowest
+  unsigned long pc;         // holds the current pc value when pre emptied
+};
+
 //#define DEFAULT_PID 0Lu
 #define DEFAULT_STATE new
 #define DEFAULT_PC 0Lu
@@ -15,15 +22,20 @@
 // Member Functions
 /**
  * Returns a pcb pointer to heap allocation.
+ * @param ptr_error a pointer to an integer used to report any errors which may 
+ *      occur. 
+ *      <code>*ptr_error</code> will contain 0 if no errors occurred and 4 if 
+ *      <code>malloc</code> returned <code>NULL</code>. If this pointer is 
+ *      <code>NULL</code>, nothing will be reported. 
+ * @return a pointer to a newly allocated pcb object (or <code>NULL</code>)
  * 
- * @return a pointer to a new PCB object
  */
 PCB_p PCB_construct (int *ptr_error)
 {
   PCB_p this = (PCB_p) malloc(sizeof(PCB));
   
-  
-  int error = ((!this) * 4) || PCB_init(this);
+  this == NULL;
+  int error = (!this) * 4;
   if(ptr_error != NULL)
   {
     *ptr_error = error;
@@ -33,7 +45,10 @@ PCB_p PCB_construct (int *ptr_error)
 
 /**
  * Deallocates pcb from the heap.
- * @param this
+ * 
+ * @param this instance of a <code>PCB_p</code> to be freed. 
+ * @return <code>1</code> if <code>this</code> param was <code>NULL</code>, 
+ *        <code>0</code>, otherwise. 
  */
 int PCB_destruct (PCB_p this)
 {
@@ -46,20 +61,29 @@ int PCB_destruct (PCB_p this)
 }
 
 /**
- * Sets default values for member data.
- * @param this
- * @return 
+ * Sets default values for member data. <i>Note:</i> this function will call
+ * <code>srand</code> when it is first executed.
+ * be called before using this function.
+ * @param this instance of a <code>PCB_p</code> to be initialized.
+ * @return error code of <code>1</code> if <code>this</code> is 
+ *      <code>NULL</code>, <code>0</code> otherwise.
  */
 int PCB_init (PCB_p this)
 {
-  static unsigned long pidCounter = 1;
-  int error = (this == NULL);
+  static unsigned long pidCounter = 0;
+  static int firstCall = 1;
+  if (firstCall)
+  {
+    srand(time(NULL)<<1);
+    firstCall = 0;
+  }
+  int error = this == NULL;
   
   if(!error)
   {
     this->pid = pidCounter++;
     this->pc = DEFAULT_PC;
-    this->priority = rand() & LOWEST_PRIORITY;
+    this->priority = rand() & 0x1F;
     this->state = DEFAULT_STATE;
   }
   return error;
@@ -74,13 +98,13 @@ int PCB_init (PCB_p this)
  */
 int PCB_setPid (PCB_p this, unsigned long pid)
 {
-  // verify pid does not already exist
+  /// TODO: verify pid does not already exist
   int error = this == NULL;
   if(!error)
   {
     this->pid = pid;
   }
-  return error;// TODO: write
+  return error;
 }
 
 /**
@@ -158,7 +182,7 @@ int PCB_setPriority (PCB_p this, unsigned short priority)
   {
     error |= 1;
   }
-  if(priority > LOWEST_PRIORITY)
+  if(priority > 0x0F)
   {
     error |= 2;
   }
@@ -218,6 +242,37 @@ unsigned long PCB_getPc (PCB_p this, int *ptr_error)
   }
   return error ? ~0 : this->pc; // TODO: write
 }
+
+int PCB_equals (PCB_p this, PCB_p other, int * ptr_error)
+{
+  if (ptr_error != NULL)
+  {
+    *ptr_error = 0;
+  }
+  return this == other || PCB_compareTo(this, other, ptr_error);
+}
+int PCB_compareTo (PCB_p this, PCB_p other, int * ptr_error)
+{
+  int error = this == NULL | (other == NULL) << 1;
+  if (error == 0)
+  {
+    int c = this->priority - other->priority || this->pid - other->pid || 
+        this->state - other->state || this->pc == other->pc;
+    if (c > 0)
+    {
+      c = 1;
+    }
+    else if (c < 0)
+    {
+      c = -1;
+    }
+  }
+  if (ptr_error != NULL)
+  {
+    *ptr_error = error;
+  }
+}
+
 /**
  * Returns a string representing the contents of the pcb. 
  * <br /><em><strong>Note:</strong> parameter string must be 80 chars or more.</em>
@@ -232,7 +287,7 @@ char * PCB_toString (PCB_p this, char *str, int *ptr_error)
   if(!error)
   {
     str[0] = '\0';
-    const char * format = "PID: 0x%x, Priority 0x%x, state: %d, PC: 0x%x";
+    const char * format = "PID: 0x%x, Priority 0x%02x, state: %d, PC: 0x%x";
     snprintf (str, (size_t) 79, format, this->pid, this->priority, this->state, this->pc);
   }
   if(ptr_error != NULL)
@@ -240,5 +295,4 @@ char * PCB_toString (PCB_p this, char *str, int *ptr_error)
     *ptr_error = error;
   }
   return str;
-  
 }
