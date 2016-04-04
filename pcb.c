@@ -36,6 +36,10 @@ PCB_p PCB_construct (int *ptr_error)
   
   this == NULL;
   int error = (!this) * 4;
+  this->pc = 0;
+  this->pid = 0;
+  this->priority = 0;
+  this->state = 0;
   if(ptr_error != NULL)
   {
     *ptr_error = error;
@@ -81,7 +85,7 @@ int PCB_init (PCB_p this)
   
   if(!error)
   {
-    this->pid = pidCounter++;
+    this->pid = ++pidCounter;
     this->pc = DEFAULT_PC;
     this->priority = rand() & 0x1F;
     this->state = DEFAULT_STATE;
