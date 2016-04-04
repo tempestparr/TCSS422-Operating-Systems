@@ -91,7 +91,7 @@ void testFIFOq_dequeue() {
 void testFIFOq_toString() {
     FIFOq_p p0;
     char* p1;
-    int p2;
+    int* p2;
     int* p3;
     char* result = FIFOq_toString(p0, p1, p2, p3);
     if (1 /*check result*/) {
@@ -181,13 +181,14 @@ int FIFOq_test_main(int argc, char** argv) {
     char str[stz];
     FIFOq_p fiq = FIFOq_construct(&error);
     int r = rand()%20 + 10;
-    printf("!!! %s   %d\n", FIFOq_toString(fiq, str, stz, &error), r);
+    printf("!!! Q:%s   %d\n", FIFOq_toString(fiq, str, &stz, &error), r);
    
     for (idx = 0; idx < r; idx++)
     {
         FIFOq_enqueue(fiq, Node_construct(PCB_construct(&error), NULL, &error), &error);
         char pcbstr[128];
-        printf("%s : contents: %s\n", FIFOq_toString(fiq, str, stz, &error),
+        stz = 256;
+        printf("Q:%s : contents: %s\n", FIFOq_toString(fiq, str, &stz, &error),
                 PCB_toString(FIFOq_last_pcb(fiq, &error), pcbstr, &error));
     }    
     
@@ -195,7 +196,8 @@ int FIFOq_test_main(int argc, char** argv) {
     {
         PCB_p pcb = FIFOq_dequeue(fiq, &error);
         char pcbstr[128];
-        printf("%s\ncontents: %s\n", FIFOq_toString(fiq, str, stz, &error),
+        stz = 256;
+        printf("Q:%s\ncontents: %s\n", FIFOq_toString(fiq, str, &stz, &error),
                 PCB_toString(pcb, pcbstr, &error));
         PCB_destruct(pcb);
         

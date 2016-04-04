@@ -23,11 +23,21 @@
 #define true true_
 #define false false_
 
+#define PRIORITIES_TOTAL 32
+#define LOWEST_PRIORITY (PRIORITIES_TOTAL - 1)
+
 typedef enum {false, true} bool;
 //#define this this_
 // all typedefs
 
 enum state_type {new, ready, running, interrupted, waiting, halted};
+
+struct pcb {
+  unsigned long pid;        // process ID #, a unique number
+  enum state_type state;    // process state (running, waiting, etc.)
+  unsigned short priority;  // priorities 0=highest, LOWEST_PRIORITY=lowest
+  unsigned long pc;         // holds the current pc value when pre emptied
+};
 
 typedef struct pcb PCB;
 typedef PCB * PCB_p;

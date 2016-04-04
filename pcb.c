@@ -7,13 +7,6 @@
 #include <string.h>
 #include "pcb.h"
 
-struct pcb {
-  unsigned long pid;        // process ID #, a unique number
-  enum state_type state;    // process state (running, waiting, etc.)
-  unsigned short priority;  //priorities 0=highest, 15=lowest
-  unsigned long pc;         // holds the current pc value when pre emptied
-};
-
 //#define DEFAULT_PID 0Lu
 #define DEFAULT_STATE new
 #define DEFAULT_PC 0Lu
@@ -59,14 +52,14 @@ int PCB_destruct (PCB_p this)
  */
 int PCB_init (PCB_p this)
 {
-  static unsigned long pidCounter = 0;
-  int error = this == NULL;
+  static unsigned long pidCounter = 1;
+  int error = (this == NULL);
   
   if(!error)
   {
     this->pid = pidCounter++;
     this->pc = DEFAULT_PC;
-    this->priority = rand() & 0x1F;
+    this->priority = rand() & LOWEST_PRIORITY;
     this->state = DEFAULT_STATE;
   }
   return error;
@@ -165,7 +158,7 @@ int PCB_setPriority (PCB_p this, unsigned short priority)
   {
     error |= 1;
   }
-  if(priority > 0x0F)
+  if(priority > LOWEST_PRIORITY)
   {
     error |= 2;
   }

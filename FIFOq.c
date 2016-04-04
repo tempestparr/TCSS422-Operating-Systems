@@ -22,7 +22,7 @@ FIFOq_p FIFOq_construct(int *error)
     return this;
 }
 
-void FIFOq_destruct (FIFOq_p this, int *error)
+void FIFOq_destruct(FIFOq_p this, int *error)
 {
     if (!is_null(this, error))
     {
@@ -35,12 +35,11 @@ void FIFOq_destruct (FIFOq_p this, int *error)
         }
         free(this);
         this = NULL;
-        if (this == NULL) printf("NULLLL!!!");
     }
 }
 
 
-int FIFOq_init (FIFOq_p this, int *error)
+int FIFOq_init(FIFOq_p this, int *error)
 {
     if (!is_null(this, error))
     {
@@ -112,11 +111,12 @@ PCB_p FIFOq_last_pcb(FIFOq_p this, int *error)
     return NULL;
 }
 
-char * FIFOq_toString (FIFOq_p this, char *str, int stz, int *error)
+char * FIFOq_toString(FIFOq_p this, char *str, int *stz, int *error)
 {
+    int usedChars = 0;
     if (!is_null(this, error) && !is_null(str, error))
     {
-        snprintf(str, stz, "Q:Count=%d:", this->size);
+        usedChars += snprintf(str, *stz - usedChars, "Count=%d:", this->size);
         if (this->head != NULL)
         {
 //            snprintf(str + strlen(str), stz, "P%d-", this->head->pos);             
@@ -124,11 +124,12 @@ char * FIFOq_toString (FIFOq_p this, char *str, int stz, int *error)
             Node_p node = this->head;
             while (node != NULL)
             {
-                snprintf(str + strlen(str), stz, "%cP%d-", node == this->head? ' ' : '>', node->pos);
+                usedChars += snprintf(str + strlen(str), *stz - usedChars, "%cP%lu-", node == this->head? ' ' : '>', node->data->pid);
                 node = node->next_node;
             }
-            snprintf(str + strlen(str), stz, "*");
+            usedChars += snprintf(str + strlen(str), *stz - usedChars, "*");
         }
+        *stz = *stz - usedChars;
         return str;
     }
     else return 0;
@@ -207,7 +208,7 @@ int Node_setNext (Node_p this, Node_p next_node)
 
 char * Node_toString (Node_p this, char *str, int *ptr_error)
 {
-  int error = this == NULL | 2 * (str == NULL) | 4 * (this->data == NULL);
+  int error = ((this == NULL) | (2 * (str == NULL)) | (4 * (this->data == NULL)));
   if (ptr_error != NULL) 
   {
     *ptr_error = error;
