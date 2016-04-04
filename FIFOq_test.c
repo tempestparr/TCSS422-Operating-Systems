@@ -189,7 +189,7 @@ int FIFOq_test_main(int argc, char** argv) {
         char pcbstr[128];
         stz = 256;
         printf("Q:%s : contents: %s\n", FIFOq_toString(fiq, str, &stz, &error),
-                PCB_toString(FIFOq_last_pcb(fiq, &error), pcbstr, &error));
+                PCB_toString(fiq->tail->data, pcbstr, &error));
     }    
     
     while (!FIFOq_is_empty(fiq, &error))

@@ -15,11 +15,11 @@ int main(int argc, char** argv) {
     // printf("starting PCB_test_main\n");
     // PCB_test_main(0, NULL);
     
-    // printf("starting FIFOq_test_main\n");
-    // FIFOq_test_main(0, NULL);
+     printf("starting FIFOq_test_main\n");
+     FIFOq_test_main(0, NULL);
     
-    printf("starting PriorityQ_test_main\n");
-    PriorityQ_test_main();
+//    printf("starting PriorityQ_test_main\n");
+//    PriorityQ_test_main();
     
     return 0;
 }
