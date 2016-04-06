@@ -1,14 +1,7 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/* 
- * File:   pcb.h
- * Author: chris
- *
- * Created on March 25, 2016, 5:20 PM
+ * Problem 1 - OS Abstract Data Types
+ * TCSS 422 A Spring 2016
+ * Christopher Ottersen, Tempest Parr, Mark Peters
  */
 
 #ifndef PCB_H
@@ -126,6 +119,8 @@ unsigned long PCB_getPc (PCB_p this, int *ptr_error);
  * @return string representing the contents of the pcb
  */
 char * PCB_toString (PCB_p this, char *str, int *ptr_error);
+
+int PCB_compareTo(PCB_p this, PCB_p other, int *ptr_error);
 
 #endif /* PCB_H */
 

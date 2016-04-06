@@ -1,8 +1,7 @@
-/* 
- * File:   PriorityQ.c
- * Author: Tempest Parr
- *
- * Created on April 3rd 2016
+/*
+ * Problem 1 - OS Abstract Data Types
+ * TCSS 422 A Spring 2016
+ * Christopher Ottersen, Tempest Parr, Mark Peters
  */
 
 #include "PriorityQ.h"
@@ -82,8 +81,8 @@ bool PriorityQ_is_empty(PriorityQ_p readyQ) {
 void PriorityQ_enqueue(PriorityQ_p readyQ, PCB_p pcbToEnqueue) {
     int error = 0;
     Node_p nodeWithPcb = Node_construct(pcbToEnqueue, NULL, &error);
-    
-    FIFOq_enqueue(readyQ[pcbToEnqueue->priority], nodeWithPcb, &error);
+    unsigned short priority = PCB_getPriority(pcbToEnqueue, NULL);
+    FIFOq_enqueue(readyQ[priority], nodeWithPcb, &error);
 }
 
 /**

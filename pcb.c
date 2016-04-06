@@ -1,10 +1,13 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Problem 1 - OS Abstract Data Types
+ * TCSS 422 A Spring 2016
+ * Christopher Ottersen, Tempest Parr, Mark Peters
  */
+
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+#include <time.h>
 #include "pcb.h"
 
 struct pcb {

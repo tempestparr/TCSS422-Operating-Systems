@@ -1,33 +1,32 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/* 
- * File:   FIFOq.h
- * Author: Mark
- *
- * Created on April 1, 2016, 12:11 PM
+ * Problem 1 - OS Abstract Data Types
+ * TCSS 422 A Spring 2016
+ * Christopher Ottersen, Tempest Parr, Mark Peters
  */
 
 #ifndef FIFOQ_H
 #define FIFOQ_H
 
-#define this this_
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "pcb.h"
 
+#define this this_
+#define FIFO_NULL_ERROR 11
+#define FIFO_CONSTRUCT_ERROR 13
+#define FIFO_STRING_ERROR 17
+#define NODE_NULL_ERROR 23
+#define NODE_CONSTRUCT_ERROR 29
+#define NODE_STRING_ERROR 31
+#define NODE_DATA_ERROR 37
 
 typedef struct FIFOq * FIFOq_p;
-
-
 typedef struct Node_type Node;
 typedef Node * Node_p;
 
-struct FIFOq {
+struct FIFOq
+{
     int size;
     Node_p head;
     Node_p tail;
@@ -35,7 +34,7 @@ struct FIFOq {
 
 struct Node_type
 {
-    int pos;
+  int pos;
   PCB_p data;
   Node_p next_node;
 };

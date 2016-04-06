@@ -1,8 +1,7 @@
-/* 
- * File:   PriorityQ.h
- * Author: Tempest Parr
- *
- * Created on April 3rd 2016
+/*
+ * Problem 1 - OS Abstract Data Types
+ * TCSS 422 A Spring 2016
+ * Christopher Ottersen, Tempest Parr, Mark Peters
  */
 
 #ifndef PRIORITYQ_H
@@ -11,6 +10,7 @@
 #include "FIFOq.h"
 
 #define PRIORITY_Q_STRING_BUFFER_SIZE 8192
+#define PRIORITIES_TOTAL 16
 
 typedef FIFOq_p * PriorityQ_p;
 
