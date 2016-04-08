@@ -1,22 +1,10 @@
 
-/* 
- * File:   main.c
- * Author: chris
- *
- * Created on March 25, 2016, 4:57 PM
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include "pcb.h"
 
-#define data 
-/*
- * 
- */
-int main(int argc, char** argv)
-{
+int PCB_test_main(int argc, char** argv) {
   int error;
   char str[80];
   srand(time(NULL));

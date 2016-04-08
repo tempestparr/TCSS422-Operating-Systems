@@ -13,8 +13,7 @@
  * 
  * @return a pointer to a new priority queue
  */
-PriorityQ_p PriorityQ_construct(void) {
-    int error = 0;
+PriorityQ_p PriorityQ_construct(int *error) {
     int i = 0;
 
     //
@@ -22,11 +21,16 @@ PriorityQ_p PriorityQ_construct(void) {
     //
     PriorityQ_p readyQ = (PriorityQ_p) calloc(PRIORITIES_TOTAL, sizeof(FIFOq_p));
     
+    if (readyQ == NULL) {
+        *error = PRIORITY_Q_MALLOC_ERROR;
+        return NULL;
+    }
+    
     //
     // Construct FIFO queues in each array entry
     //
     for (i = 0; i < PRIORITIES_TOTAL; i++) {
-        readyQ[i] = FIFOq_construct(&error);
+        readyQ[i] = FIFOq_construct(error);
     }
     
     return readyQ;
@@ -39,13 +43,17 @@ PriorityQ_p PriorityQ_construct(void) {
  *
  * @param readyQ  - priority queue to destroy
  */
-void PriorityQ_destruct(PriorityQ_p readyQ) {
+void PriorityQ_destruct(PriorityQ_p readyQ, int *error) {
     int i;
-    int error = 0;
+    
+    if (readyQ == NULL) {
+        *error = PRIORITY_Q_NULL_PARAM_ERROR;
+        return;
+    }
     
     for (i = 0; i < PRIORITIES_TOTAL; i++) {
         if (readyQ[i] != NULL) {
-            FIFOq_destruct (readyQ[i], &error);
+            FIFOq_destruct (readyQ[i], error);
         }
     }
     
@@ -59,12 +67,16 @@ void PriorityQ_destruct(PriorityQ_p readyQ) {
  *
  * @return true if priority queue is empty, false is it's not
  */
-bool PriorityQ_is_empty(PriorityQ_p readyQ) {
+bool PriorityQ_is_empty(PriorityQ_p readyQ, int *error) {
     int i;
-    int error = 0;
+
+    if (readyQ == NULL) {
+        *error = PRIORITY_Q_NULL_PARAM_ERROR;
+        return false;
+    }
     
     for (i = 0; i < PRIORITIES_TOTAL; i++) {
-        if ((readyQ[i] != NULL) && (!FIFOq_is_empty(readyQ[i], &error))) {
+        if ((readyQ[i] != NULL) && (!FIFOq_is_empty(readyQ[i], error))) {
             return false;
         }
     }
@@ -78,11 +90,15 @@ bool PriorityQ_is_empty(PriorityQ_p readyQ) {
  * @param readyQ - priority queue to add the PCB to
  * @param pcbToEnqueue - PCB to add to the priority queue
  */
-void PriorityQ_enqueue(PriorityQ_p readyQ, PCB_p pcbToEnqueue) {
-    int error = 0;
-    Node_p nodeWithPcb = Node_construct(pcbToEnqueue, NULL, &error);
+void PriorityQ_enqueue(PriorityQ_p readyQ, PCB_p pcbToEnqueue, int *error) {
+    if (readyQ == NULL || pcbToEnqueue == NULL) {
+        *error = PRIORITY_Q_NULL_PARAM_ERROR;
+        return;
+    }
+    
+    Node_p nodeWithPcb = Node_construct(pcbToEnqueue, NULL, error);
     unsigned short priority = PCB_getPriority(pcbToEnqueue, NULL);
-    FIFOq_enqueue(readyQ[priority], nodeWithPcb, &error);
+    FIFOq_enqueue(readyQ[priority], nodeWithPcb, error);
 }
 
 /**
@@ -92,13 +108,17 @@ void PriorityQ_enqueue(PriorityQ_p readyQ, PCB_p pcbToEnqueue) {
  *
  * @return PCB removed from the priority queue
  */
-PCB_p PriorityQ_dequeue(PriorityQ_p readyQ) {
+PCB_p PriorityQ_dequeue(PriorityQ_p readyQ, int *error) {
     int i;
-    int error = 0;
 
+    if (readyQ == NULL) {
+        *error = PRIORITY_Q_NULL_PARAM_ERROR;
+        return NULL;
+    }
+    
     for (i = 0; i < PRIORITIES_TOTAL; i++) {
-        if ((readyQ[i] != NULL) && (!FIFOq_is_empty(readyQ[i], &error))) {
-            return FIFOq_dequeue(readyQ[i], &error);
+        if ((readyQ[i] != NULL) && (!FIFOq_is_empty(readyQ[i], error))) {
+            return FIFOq_dequeue(readyQ[i], error);
         }
     }
 
@@ -112,18 +132,28 @@ PCB_p PriorityQ_dequeue(PriorityQ_p readyQ) {
  *
  * @return pointer to a string with the representation of the priority queue
  */
-char * PriorityQ_toString(PriorityQ_p readyQ) {
+char * PriorityQ_toString(PriorityQ_p readyQ, int *error) {
     char * buffer = (char *) calloc(PRIORITY_Q_STRING_BUFFER_SIZE, sizeof(char));
     int totalSize = 0;
     int i = 0;
-    int error = 0;
     int stzForFifoQ;
+    
+    if (readyQ == NULL) {
+        *error = PRIORITY_Q_NULL_PARAM_ERROR;
+        return NULL;
+    }
+    
+    if (buffer == NULL) {
+        *error = PRIORITY_Q_MALLOC_ERROR;
+        return NULL;
+    }
+    
     for (i = 0; i < PRIORITIES_TOTAL; i++) {
         totalSize += snprintf(buffer + totalSize, PRIORITY_Q_STRING_BUFFER_SIZE - totalSize, "Q%d:", i);
         
         // this number is how much space left in the buffer
         stzForFifoQ = PRIORITY_Q_STRING_BUFFER_SIZE - totalSize;
-        FIFOq_toString(readyQ[i], buffer + totalSize, &stzForFifoQ, &error);
+        FIFOq_toString(readyQ[i], buffer + totalSize, &stzForFifoQ, error);
         
         // stz gets updated by fifoq's tostring, need to recalc totalSize
         totalSize = PRIORITY_Q_STRING_BUFFER_SIZE - stzForFifoQ;

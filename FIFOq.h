@@ -25,15 +25,13 @@ typedef struct FIFOq * FIFOq_p;
 typedef struct Node_type Node;
 typedef Node * Node_p;
 
-struct FIFOq
-{
+struct FIFOq {
     int size;
     Node_p head;
     Node_p tail;
 };
 
-struct Node_type
-{
+struct Node_type {
   int pos;
   PCB_p data;
   Node_p next_node;
@@ -45,7 +43,6 @@ int     FIFOq_init     (FIFOq_p, int*);              // sets default values for 
 int     FIFOq_is_empty (FIFOq_p, int*);
 void    FIFOq_enqueue  (FIFOq_p, Node_p, int*);
 PCB_p   FIFOq_dequeue  (FIFOq_p, int*);
-//PCB_p   FIFOq_last_pcb (FIFOq_p, int*);
 char *  FIFOq_toString (FIFOq_p, char*, int*, int*); // returns a string representing the contents of the pcb
 
 Node_p Node_construct(PCB_p data, Node_p next, int * ptr_error);

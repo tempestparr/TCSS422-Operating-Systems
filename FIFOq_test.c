@@ -1,16 +1,4 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
  * File:   FIFOq_test.c
  * Author: Mark
  *
@@ -20,10 +8,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "FIFOq.h"
-
-/*
- * Simple C Test Suite
- */
 
 void testIs_null() {
     void* this_;
@@ -179,21 +163,24 @@ int FIFOq_test_main(int argc, char** argv) {
     int idx = 0;
     int stz = 256;
     char str[stz];
+    PCB_p pcbToEnqueue;
     FIFOq_p fiq = FIFOq_construct(&error);
     int r = rand()%20 + 10;
-    printf("!!! Q:%s   %d\n", FIFOq_toString(fiq, str, &stz, &error), r);
-   
-    for (idx = 0; idx < r; idx++)
-    {
-        FIFOq_enqueue(fiq, Node_construct(PCB_construct(&error), NULL, &error), &error);
+    // printf("Q:%s   %d\n", FIFOq_toString(fiq, str, &stz, &error), r);
+    printf("\nenqueuing %d PCBs into the FIFOq:\n", r);
+
+    for (idx = 0; idx < r; idx++) {
+        pcbToEnqueue = PCB_construct(NULL);
+        PCB_init(pcbToEnqueue);
+        FIFOq_enqueue(fiq, Node_construct(pcbToEnqueue, NULL, &error), &error);
         char pcbstr[128];
         stz = 256;
         printf("Q:%s : contents: %s\n", FIFOq_toString(fiq, str, &stz, &error),
                 PCB_toString(fiq->tail->data, pcbstr, &error));
     }    
     
-    while (!FIFOq_is_empty(fiq, &error))
-    {
+    printf("\ndequeuing %d PCBs from the FIFOq:\n", r);
+    while (!FIFOq_is_empty(fiq, &error)) {
         PCB_p pcb = FIFOq_dequeue(fiq, &error);
         char pcbstr[128];
         stz = 256;
