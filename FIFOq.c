@@ -6,6 +6,12 @@
 
 #include "FIFOq.h"
 
+/* Constructs you a boring empty FIFO queue and also intializes it.
+ * 
+ * error is the error pointer
+ * 
+ * returns you a boring empty FIFO queue
+ */
 FIFOq_p FIFOq_construct(int *error) {
     FIFOq_p this = (FIFOq_p) malloc(sizeof(struct FIFOq));
     int init_error = ((!this) * FIFO_CONSTRUCT_ERROR) || FIFOq_init(this, error);
@@ -15,11 +21,17 @@ FIFOq_p FIFOq_construct(int *error) {
     return this;
 }
 
+/* Utterly destroys the FIFO queue and everything in it.
+ * 
+ * this is the FIFO queue no more
+ * error is the error pointer
+ */
 void FIFOq_destruct(FIFOq_p this, int *error) {
     if (!is_null(this, error)) {
         Node_p node = this->head;
         while (this->head != NULL) {
             node = this->head->next_node;
+            PCB_destruct(node->data);
             Node_destruct(this->head);
             this->head = node;
         }
@@ -28,6 +40,13 @@ void FIFOq_destruct(FIFOq_p this, int *error) {
     }
 }
 
+/* Initializes the values of the FIFO queue.
+ * 
+ * this is the FIFO queue that is hopelessly lost without values
+ * error is the error pointer and everything that is wrong with society
+ * 
+ * returns an error int
+ */
 int FIFOq_init(FIFOq_p this, int *error) {
     if (!is_null(this, error)) {
         this->size = 0;
@@ -36,6 +55,13 @@ int FIFOq_init(FIFOq_p this, int *error) {
     return error == NULL ? 0 : *error;
 }
 
+/* Checks if the queue is empty and tells you politely.
+ * 
+ * this is the queue that may or may not be empty
+ * error is the error pointer
+ * 
+ * returns the error as a plain boring int
+ */
 int FIFOq_is_empty(FIFOq_p this, int *error) {
     if (!is_null(this, error)) {
         return this->head == NULL;
@@ -43,6 +69,15 @@ int FIFOq_is_empty(FIFOq_p this, int *error) {
     return error == NULL ? 0 : *error;
 }
 
+/* Enqueues the given node to the end (tail) of the queue, unless the queue is
+ * empty, in which case it enqueues to the head.
+ * 
+ * this is the FIFO queue whose beautiful little village is growing by one
+ * next is the node to queue into the FIFO queue
+ * error is the pointer error
+ * 
+ * returns nothing because too bad
+ */
 void FIFOq_enqueue(FIFOq_p this, Node_p next, int *error) {
     if (!is_null(this, error) && !is_null(next, error)) {
 
@@ -66,6 +101,15 @@ void FIFOq_enqueue(FIFOq_p this, Node_p next, int *error) {
     }
 }
 
+/* Dequeues the node located at the head of the queue, destroying the node and
+ * returning the pcb pointer. The head of the fifo queue is re-chosen to be
+ * the next_node of the former head node.
+ * 
+ * this is the FIFO queue we are dequeueing from
+ * error is the error pointer
+ * 
+ * returns the pcb pointer that was the head
+ */
 PCB_p FIFOq_dequeue(FIFOq_p this, int *error) {
     if (!is_null(this, error) && !is_null(this->head, error)) {
         Node_p node = this->head;
@@ -85,6 +129,16 @@ PCB_p FIFOq_dequeue(FIFOq_p this, int *error) {
     return NULL;
 }
 
+/* FIFO toString command, which gives an output of each element in the queue
+ * with their node number plus the toString of the last pcb.
+ * 
+ * this is the FIFO queue whose toString we're constructing
+ * str is the string to place the toString in
+ * stz is the size of that string bugger
+ * error is the error pointer
+ * 
+ * return a version of the toString as a null-terminated char pointer
+ */
 char * FIFOq_toString(FIFOq_p this, char *str, int *stz, int *error) {
     int usedChars = 0;
     if (!is_null(this, error) && !is_null(str, error)) {
@@ -106,6 +160,15 @@ char * FIFOq_toString(FIFOq_p this, char *str, int *stz, int *error) {
     }
 }
 
+/* Constructs a node with the given parameters. For internal use only within
+ * the FIFO queue so thus acting as an inner class.
+ * 
+ * data is the pcb to stick in the node
+ * next_node is the linked node that follows the current one
+ * error is the error pointer
+ * 
+ * returns the node, duh
+ */
 Node_p Node_construct (PCB_p data, Node_p next_node, int *error) {
     Node_p this = (Node_p) malloc(sizeof(struct Node_type));
     int init_error = ((!this) * NODE_CONSTRUCT_ERROR) ||

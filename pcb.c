@@ -12,6 +12,10 @@
 
 #define DEFAULT_STATE new
 #define DEFAULT_PC 0Lu
+#define PCB_NULL_ERROR 5
+#define PCB_INIT_ERROR 7
+#define PCB_OTHER_ERROR 41
+
 
 struct pcb {
   unsigned long pid;        // process ID #, a unique number
@@ -28,14 +32,14 @@ struct pcb {
 PCB_p PCB_construct (int *ptr_error) {
   PCB_p this = (PCB_p) malloc(sizeof(PCB));
   
-  int error = ((!this) * 4);
+  int error = ((!this) * PCB_INIT_ERROR);
   this->pc = 0;
   this->pid = 0;
   this->priority = 0;
   this->state = 0;
 
   if(ptr_error != NULL) {
-    *ptr_error = error;
+    *ptr_error += error;
   }
   return (this);
 }
@@ -45,7 +49,7 @@ PCB_p PCB_construct (int *ptr_error) {
  * @param this
  */
 int PCB_destruct (PCB_p this) {
-  int error = this == NULL; // sets error code to 1 if `this` is NULL
+  int error = (this == NULL) * PCB_NULL_ERROR; // sets error code to 1 if `this` is NULL
   if(!error) {
     free(this);
   }
@@ -64,7 +68,7 @@ int PCB_init (PCB_p this) {
     srand(time(NULL)<<1);
     firstCall = 0;
   }
-  int error = (this == NULL);
+  int error = (this == NULL) * PCB_NULL_ERROR;
   
   if(!error) {
     this->pid = ++pidCounter;
@@ -84,7 +88,7 @@ int PCB_init (PCB_p this) {
  */
 int PCB_setPid (PCB_p this, unsigned long pid) {
   // verify pid does not already exist
-  int error = this == NULL;
+  int error = (this == NULL) * PCB_NULL_ERROR;
   if(!error) {
     this->pid = pid;
   }
@@ -98,10 +102,10 @@ int PCB_setPid (PCB_p this, unsigned long pid) {
  * @return the pid of the process
  */
 unsigned long PCB_getPid (PCB_p this, int *ptr_error) {
-  int error = this == NULL;
+  int error = (this == NULL) * PCB_NULL_ERROR;
   
   if (ptr_error != NULL) {
-    *ptr_error = error;
+    *ptr_error += error;
   }
   
   return error ? ~0 : this->pid;// TODO: write
@@ -117,10 +121,10 @@ unsigned long PCB_getPid (PCB_p this, int *ptr_error) {
 int PCB_setState (PCB_p this, enum state_type state) {
   int error = 0;
   if(this == NULL) {
-    error |= 1;
+    error |= PCB_NULL_ERROR;
   }
   if(state < new || state > halted) {
-    error |= 2;
+    error |= PCB_OTHER_ERROR;
   }
   if(!error) {
     this->state = state;
@@ -135,10 +139,10 @@ int PCB_setState (PCB_p this, enum state_type state) {
  * @return the state of the process
  */
 enum state_type PCB_getState (PCB_p this, int *ptr_error) {
-  int error = this == NULL;
+  int error = (this == NULL) * PCB_NULL_ERROR;
   
   if(ptr_error != NULL) {
-    *ptr_error = error;
+    *ptr_error += error;
   }
   return error ? ~0 : this->state;
 }
@@ -154,10 +158,10 @@ enum state_type PCB_getState (PCB_p this, int *ptr_error) {
 int PCB_setPriority (PCB_p this, unsigned short priority) {
   int error = 0;
   if(this == NULL) {
-    error |= 1;
+    error |= PCB_NULL_ERROR;
   }
   if(priority > LOWEST_PRIORITY) {
-    error |= 2;
+    error |= PCB_OTHER_ERROR;
   }
   if (!error) {
     this->priority = priority; 
@@ -172,10 +176,10 @@ int PCB_setPriority (PCB_p this, unsigned short priority) {
  * @return the pid of the process
  */
 unsigned short PCB_getPriority (PCB_p this, int *ptr_error) {
-  int error = this == NULL;
+  int error = (this == NULL) * PCB_NULL_ERROR;
   
   if(ptr_error != NULL) {
-    *ptr_error = error;
+    *ptr_error += error;
   }
   return error ? ~0 : this->priority; // TODO: write
 }
@@ -188,7 +192,7 @@ unsigned short PCB_getPriority (PCB_p this, int *ptr_error) {
  * @return 
  */
 int PCB_setPc (PCB_p this, unsigned long pc) {
-  int error = this == NULL;
+  int error = (this == NULL) * PCB_NULL_ERROR;
   if (!error) {
     this->pc = pc;
   }
@@ -202,9 +206,9 @@ int PCB_setPc (PCB_p this, unsigned long pc) {
  * @return the address where the program will resume
  */
 unsigned long PCB_getPc (PCB_p this, int *ptr_error) {
-  int error = this == NULL;
+  int error = (this == NULL) * PCB_NULL_ERROR;
   if(ptr_error != NULL) {
-    *ptr_error = error;
+    *ptr_error += error;
   }
   return error ? ~0 : this->pc; // TODO: write
 }
@@ -217,7 +221,7 @@ unsigned long PCB_getPc (PCB_p this, int *ptr_error) {
  * @return string representing the contents of the pc.
  */
 char * PCB_toString (PCB_p this, char *str, int *ptr_error) {
-  int error = this == NULL || str == NULL;
+  int error = (this == NULL || str == NULL) * PCB_NULL_ERROR;
   if(!error) {
     str[0] = '\0';
     const char * format = "PID: 0x%x, Priority 0x%x, state: %d, PC: 0x%04x";
@@ -225,7 +229,7 @@ char * PCB_toString (PCB_p this, char *str, int *ptr_error) {
   }
   
   if(ptr_error != NULL) {
-    *ptr_error = error;
+    *ptr_error += error;
   }
   return str;
   
