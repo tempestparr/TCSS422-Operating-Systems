@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
 	srand(time(NULL));
     
 	printf("\nstarting PCB_test_main\n");
-//	PCB_test_main(0, NULL);
+	PCB_test_main(0, NULL);
     
  	printf("\nstarting FIFOq_test_main\n");
  	FIFOq_test_main(0, NULL);

@@ -14,7 +14,7 @@ PriorityQ.o:
 	gcc -c PriorityQ.c
 
 PriorityQ_test.o:
-	gcc -c 	PriorityQ_test.c
+	gcc -c PriorityQ_test.c
 
 pcb.o:
 	gcc -c pcb.c
