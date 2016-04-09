@@ -52,6 +52,7 @@ int PCB_destruct (PCB_p this) {
   int error = (this == NULL) * PCB_NULL_ERROR; // sets error code to 1 if `this` is NULL
   if(!error) {
     free(this);
+this = NULL;
   }
   return error;
 }

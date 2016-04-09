@@ -31,7 +31,7 @@ void FIFOq_destruct(FIFOq_p this, int *error) {
         Node_p node = this->head;
         while (this->head != NULL) {
             node = this->head->next_node;
-            PCB_destruct(node->data);
+            PCB_destruct(this->head->data);
             Node_destruct(this->head);
             this->head = node;
         }
