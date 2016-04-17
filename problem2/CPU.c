@@ -37,15 +37,21 @@ int mainLoopOS(int *error) {
     FIFOq_p readyQ = FIFOq_construct(error);
     int i;
     
+    srand(time(NULL)); // seed random with current time
+    
     if (*error) {
         printf("ERROR dectected before launch! %d", *error);
         return *error;
     }
     
     while(true) {
-        //createPCBs(createQ, error);
+        createPCBs(createQ, error);
         //scheduler(INTERRUPT_CREATE, createQ, readyQ, current, error);
-        //run(PC, error);
+        
+        // next line is debug code used to test run while scheduler isn't ready
+        // current = FIFOq_dequeue(createQ, error);
+
+        run(current, error);
         SysStack[++SysPointer] = PC;
         SysStack[++SysPointer] = SW;
         //isrTimer(scheduler(*)* function pointer, current, error);
@@ -87,5 +93,39 @@ void stackCleanup() {
             printf("\tSysStack[%d] = %d\n", i, SysStack[i]);
         }
     }
+}
 
+void createPCBs(FIFOq_p createQ, int *error) {
+    int i;
+    // random number of new processes between 0 and 5
+    int r = rand() % 6;
+    char buffer[80];
+    static unsigned long pid = 0;
+    
+    if (createQ == NULL) {
+        *error = CPU_NULL_ERROR;
+        printf("ERROR: FIFOq_p passed to createPCBs is NULL\n");
+        return;
+    }
+    
+    printf("createPCBs: creating %d PCBs and enqueueing them to createQ\n", r);
+    for (i = 0; i < r; i++) {
+        // PCB_construct initializes state to 0 (created)
+        PCB_p newPcb = PCB_construct_init(error);
+        // PCB_setPid(newPcb, pid++);
+        printf("New PCB created: %s\n", PCB_toString(newPcb, buffer, error));
+        FIFOq_enqueuePCB(createQ, newPcb, error);
+    }
+}
+
+void run(PCB_p current, int *error) {
+    if (current == NULL) {
+        *error = CPU_NULL_ERROR;
+        printf("ERROR: PCB_p passed to run is NULL\n");
+        return;
+    }
+    // increment the PC value by a random number between 3,000 and 4,000
+    int r = rand() % 1001 + 3000;
+    printf("run: running PID %d %d cycles\n", PCB_getPid(current, error), r);
+    PCB_setPc(current, PCB_getPc(current, error) + r);
 }

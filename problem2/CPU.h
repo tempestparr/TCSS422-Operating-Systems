@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <time.h>
 #include "FIFOq.h"
 
 #define NO_INTERRUPT 9999
@@ -20,12 +21,16 @@
 
 #define SYSSIZE 256
 
+#define CPU_NULL_ERROR 71
+
 extern unsigned int SysStack[SYSSIZE];
 extern int SysPointer;
 
-void startCPU();
-int mainLoopOS(int *error);
-void queueCleanup(FIFOq_p, char*, int*);
-void stackCleanup();
+void    startCPU    ();
+int     mainLoopOS  (int *error);
+void    queueCleanup(FIFOq_p, char*, int*);
+void    stackCleanup();
+void    createPCBs  (FIFOq_p createQ, int *error);
+void    run         (PCB_p current, int *error);
 
 #endif
