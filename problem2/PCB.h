@@ -6,12 +6,12 @@
 
 #ifndef PCB_H
 #define PCB_H
-#define NUMREGS 16
 #define created created_
 #define bool bool_
 #define true true_
 #define false false_
 
+#define NUMREGS 16
 #define PRIORITIES_TOTAL 16
 #define LOWEST_PRIORITY (PRIORITIES_TOTAL - 1)
 

@@ -18,10 +18,10 @@ void startCPU() {
     //other stuff
     if (mainLoopOS(&base_error)) {
         stackCleanup();
-        printf("System exited with error %d\n", base_error);
+        if (EXIT_STATUS_MESSAGE) printf("System exited with error %d\n", base_error);
     } else {
         stackCleanup();
-        printf("System exited without incident\n");
+        if (EXIT_STATUS_MESSAGE) printf("System exited without incident\n");
     }
 }
 
@@ -31,32 +31,44 @@ int mainLoopOS(int *error) {
     unsigned int SW = 0;
     PCB_p current = NULL;
     PCB_p idl = PCB_construct_init(error);
-    idl->sw = UINT_MAX;
+    idl->pid = UINT_MAX;
+//    idl->pc = 0x1000000;
     idl->priority = LOWEST_PRIORITY;
+    idl->sw = UINT_MAX;
+    idl->state = waiting;
     FIFOq_p createQ = FIFOq_construct(error);
     FIFOq_p readyQ = FIFOq_construct(error);
+    int exit = 0;
     int i;
     
-    srand(time(NULL)); // seed random with current time
+    //srand(time(NULL)); // seed random with current time
+    //already set in main
     
     if (*error) {
-        printf("ERROR dectected before launch! %d", *error);
+        printf("ERROR detected before launch! %d", *error);
         return *error;
     }
     
     while(true) {
-        createPCBs(createQ, error);
+        exit = createPCBs(createQ, error);
         //scheduler(INTERRUPT_CREATE, createQ, readyQ, current, error);
         
         // next line is debug code used to test run while scheduler isn't ready
         // current = FIFOq_dequeue(createQ, error);
-
-        run(current, error);
+        
+        if (current == NULL) {
+            idl->state = running;
+            run(idl, &PC, error);
+            idl->state = waiting;
+        } else {
+            run(current, &PC, error);
+        }
         SysStack[++SysPointer] = PC;
         SysStack[++SysPointer] = SW;
         //isrTimer(scheduler(*)* function pointer, current, error);
         //other stuff for later
-        break;
+        if (*error) break;
+        if (exit) break;
     }
     
     queueCleanup(readyQ, "readyQ", error);
@@ -72,12 +84,14 @@ void queueCleanup(FIFOq_p queue, char *qstr, int *error) {
     char str[stz];
     
     if (!FIFOq_is_empty(queue, error)) {
-        printf("System exited with non-empty queue %s\n", qstr);
-        printf("\t%s\n", FIFOq_toString(queue, str, &stz, error));
+        if (EXIT_STATUS_MESSAGE) {
+            printf("System exited with non-empty queue %s\n", qstr);
+            printf("\t%s\n", FIFOq_toString(queue, str, &stz, error));
+        }
         while (!FIFOq_is_empty(queue, error)) {
             PCB_p pcb = FIFOq_dequeue(queue, error);
             char pcbstr[PCB_TOSTRING_LEN];
-            printf("\t%s\n", PCB_toString(pcb, pcbstr, error));
+            if (EXIT_STATUS_MESSAGE) printf("\t%s\n", PCB_toString(pcb, pcbstr, error));
             PCB_destruct(pcb);
         }
     }
@@ -88,44 +102,55 @@ void queueCleanup(FIFOq_p queue, char *qstr, int *error) {
 void stackCleanup() {
     int i;
     if (SysPointer >= 0) {
-        printf("System exited with non-empty stack\n");
-        for (i = 0; i <= SysPointer; i++) {
-            printf("\tSysStack[%d] = %d\n", i, SysStack[i]);
+        if (EXIT_STATUS_MESSAGE) {
+            printf("System exited with non-empty stack\n");
+            for (i = 0; i <= SysPointer; i++) {
+                printf("\tSysStack[%d] = %u\n", i, SysStack[i]);
+            }
         }
     }
 }
 
-void createPCBs(FIFOq_p createQ, int *error) {
+int createPCBs(FIFOq_p createQ, int *error) {
     int i;
     // random number of new processes between 0 and 5
-    int r = rand() % 6;
-    char buffer[80];
-    static unsigned long pid = 0;
-    
-    if (createQ == NULL) {
-        *error = CPU_NULL_ERROR;
-        printf("ERROR: FIFOq_p passed to createPCBs is NULL\n");
-        return;
+    int r = rand() % (MAX_NEW_PCB+1);
+    char buffer[PCB_TOSTRING_LEN];
+    //static unsigned long pid = 0;
+    static int processes_created = 0;
+    if (r + processes_created >= MAX_PROCESSES) {
+        r = MAX_PROCESSES - processes_created;
     }
     
-    printf("createPCBs: creating %d PCBs and enqueueing them to createQ\n", r);
+    if (createQ == NULL) {
+        *error += CPU_NULL_ERROR;
+        printf("ERROR: FIFOq_p passed to createPCBs is NULL\n");
+        return *error;
+    }
+    
+    if (DEBUG) printf("createPCBs: creating %d PCBs and enqueueing them to createQ\n", r);
     for (i = 0; i < r; i++) {
         // PCB_construct initializes state to 0 (created)
         PCB_p newPcb = PCB_construct_init(error);
+        //newPcb->state = created;
         // PCB_setPid(newPcb, pid++);
-        printf("New PCB created: %s\n", PCB_toString(newPcb, buffer, error));
+        if (DEBUG) printf("New PCB created: %s\n", PCB_toString(newPcb, buffer, error));
         FIFOq_enqueuePCB(createQ, newPcb, error);
+        processes_created++;
     }
+    
+    return processes_created >= MAX_PROCESSES ? -1 : 0;
 }
 
-void run(PCB_p current, int *error) {
+void run(PCB_p current, unsigned int *PC, int *error) {
     if (current == NULL) {
-        *error = CPU_NULL_ERROR;
+        *error += CPU_NULL_ERROR;
         printf("ERROR: PCB_p passed to run is NULL\n");
         return;
     }
     // increment the PC value by a random number between 3,000 and 4,000
-    int r = rand() % 1001 + 3000;
-    printf("run: running PID %d %d cycles\n", PCB_getPid(current, error), r);
+    int r = rand() % (RUN_TIME_RANGE+1) + RUN_MIN_TIME;
+    if (DEBUG) printf("run: running PID %u %d cycles\n", PCB_getPid(current, error), r);
+    *PC += r;
     PCB_setPc(current, PCB_getPc(current, error) + r);
 }

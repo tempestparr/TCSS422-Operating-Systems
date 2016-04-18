@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
+#include <limits.h>
 #include "PCB.h"
 
 //struct and error defines originally here
@@ -58,7 +59,7 @@ int PCB_destruct (PCB_p this) {
  * @return 
  */
 int PCB_init (PCB_p this) {
-  static unsigned long pidCounter = 0;
+  static unsigned long pidCounter = UINT_MAX;
   static int firstCall = 1;
   if (!firstCall) {
     srand(time(NULL)<<1);
