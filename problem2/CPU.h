@@ -37,7 +37,7 @@ void    startCPU    ();
 int     mainLoopOS  (int *error);
 void    queueCleanup(FIFOq_p, char*, int*);
 void    stackCleanup();
-int    createPCBs  (FIFOq_p createQ, int *error);
-void    run         (PCB_p current, unsigned int *pc, int *error);
+int    createPCBs  	(FIFOq_p createQ, int *error);
+void    run         (unsigned int *pc, int *error);
 
 #endif

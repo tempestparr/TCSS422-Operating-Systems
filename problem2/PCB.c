@@ -59,7 +59,7 @@ int PCB_destruct (PCB_p this) {
  * @return 
  */
 int PCB_init (PCB_p this) {
-  static unsigned long pidCounter = UINT_MAX;
+  static unsigned long pidCounter = ULONG_MAX;
   static int firstCall = 1;
   if (!firstCall) {
     srand(time(NULL)<<1);

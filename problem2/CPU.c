@@ -58,10 +58,10 @@ int mainLoopOS(int *error) {
         
         if (current == NULL) {
             idl->state = running;
-            run(idl, &PC, error);
+            run(&PC, error);
             idl->state = waiting;
         } else {
-            run(current, &PC, error);
+            run(&PC, error);
         }
         SysStack[++SysPointer] = PC;
         SysStack[++SysPointer] = SW;
@@ -142,15 +142,22 @@ int createPCBs(FIFOq_p createQ, int *error) {
     return processes_created >= MAX_PROCESSES ? -1 : 0;
 }
 
-void run(PCB_p current, unsigned int *PC, int *error) {
-    if (current == NULL) {
-        *error += CPU_NULL_ERROR;
-        printf("ERROR: PCB_p passed to run is NULL\n");
-        return;
-    }
-    // increment the PC value by a random number between 3,000 and 4,000
+void run(unsigned int *PC, int *error) {
     int r = rand() % (RUN_TIME_RANGE+1) + RUN_MIN_TIME;
-    if (DEBUG) printf("run: running PID %u %d cycles\n", PCB_getPid(current, error), r);
     *PC += r;
-    PCB_setPc(current, PCB_getPc(current, error) + r);
+    if (DEBUG) printf("incrementing PC by %d. PC is now %p\n", r, (void *) PC);
+
 }
+
+// void run(PCB_p current, unsigned int *PC, int *error) {
+//     if (current == NULL) {
+//         *error += CPU_NULL_ERROR;
+//         printf("ERROR: PCB_p passed to run is NULL\n");
+//         return;
+//     }
+//     // increment the PC value by a random number between 3,000 and 4,000
+//     int r = rand() % (RUN_TIME_RANGE+1) + RUN_MIN_TIME;
+//     if (DEBUG) printf("run: running PID %u %d cycles\n", PCB_getPid(current, error), r);
+//     *PC += r;
+//     PCB_setPc(current, PCB_getPc(current, error) + r);
+// }
