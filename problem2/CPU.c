@@ -161,3 +161,53 @@ void run(unsigned int *PC, int *error) {
 //     *PC += r;
 //     PCB_setPc(current, PCB_getPc(current, error) + r);
 // }
+
+//dispatcher commented out. Idle needs to be a parameter, implemented globally, or as a struct
+void scheduler(int INTERRUPT, FIFOq_p createQ, FIFOq_p readyQ, PCB_p current, int* error) {
+	if (createQ == NULL) {
+		*error += FIFO_NULL_ERROR;
+		printf("%s %d: %s", "ERROR", &error, "createQ is null");
+		return;
+	}
+	if (readyQ == NULL) {
+		*error += FIFO_NULL_ERROR;
+		printf("%s %d: %s", "ERROR", &error, "readyQ is null");
+		return;
+	}
+	
+	if (createQ->size == 0 && readyQ == 0) {
+		//current = idle;
+	}
+	else (createQ->size != 0) {	
+		while (createQ->size != 0) {
+			PCB_p temp = PCB_construct(error);
+			temp = FIFOq_dequeue(createQ, error);
+			temp->state = ready;
+			FIFOq_enqueuePCB(readyQ, temp, error);
+			free(temp);
+		}
+	}
+
+	switch (INTERRUPT) {
+		
+		case NO_INTERRUPT:
+			current->state = running;
+			break;
+
+		case INTERRUPT_CREATE:
+			//dispactcher(readyQ, current, error);
+			break;
+
+		case INTERRUPT_TIMER:
+			current->state = ready;
+			FIFOq_enqueuePCB(readyQ, current, error);
+			current = NULL;
+			//dispactcher(readyQ, current, error);
+			break;
+
+		case INTERRUT_IO:
+			current->state = halted;
+			//dispactcher(readyQ, current, error);
+			break;
+	}
+}
