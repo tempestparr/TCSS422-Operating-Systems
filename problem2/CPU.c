@@ -166,26 +166,25 @@ void run(unsigned int *PC, int *error) {
 void scheduler(int INTERRUPT, FIFOq_p createQ, FIFOq_p readyQ, PCB_p current, int* error) {
 	if (createQ == NULL) {
 		*error += FIFO_NULL_ERROR;
-		printf("%s %d: %s", "ERROR", &error, "createQ is null");
+		printf("%s", "ERROR: createQ is null");
 		return;
 	}
 	if (readyQ == NULL) {
 		*error += FIFO_NULL_ERROR;
-		printf("%s %d: %s", "ERROR", &error, "readyQ is null");
+		printf("%s", "ERROR: readyQ is null");
 		return;
 	}
-	
+	/*
 	if (createQ->size == 0 && readyQ == 0) {
-		//current = idle;
-	}
-	else (createQ->size != 0) {	
-		while (createQ->size != 0) {
-			PCB_p temp = PCB_construct(error);
-			temp = FIFOq_dequeue(createQ, error);
-			temp->state = ready;
-			FIFOq_enqueuePCB(readyQ, temp, error);
-			free(temp);
-		}
+		current = idl;
+	}*/
+	
+	while (createQ->size != 0) {
+		PCB_p temp = PCB_construct(error);
+		temp = FIFOq_dequeue(createQ, error);
+		temp->state = ready;
+		FIFOq_enqueuePCB(readyQ, temp, error);
+		free(temp);
 	}
 
 	switch (INTERRUPT) {
