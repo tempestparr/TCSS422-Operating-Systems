@@ -28,7 +28,7 @@
 typedef enum {false, true} bool;
 enum state_type {created, ready, running, interrupted, waiting, halted};
 
-struct pcb {
+struct PCB {
   unsigned long pid;        // process ID #, a unique number
   enum state_type state;    // process state (running, waiting, etc.)
   unsigned short priority;  // priorities 0=highest, LOWEST_PRIORITY=lowest
@@ -39,8 +39,8 @@ struct pcb {
 
 
 
-typedef struct pcb PCB;
-typedef PCB * PCB_p;
+//typedef struct pcb PCB;
+typedef struct PCB * PCB_p;
 
 PCB_p 			PCB_construct 	(int *ptr_error);
 PCB_p 			PCB_construct_init 	(int *ptr_error);

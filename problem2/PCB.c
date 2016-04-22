@@ -19,7 +19,7 @@
  * @return a pointer to a new PCB object
  */
 PCB_p PCB_construct (int *ptr_error) {
-  PCB_p this = (PCB_p) malloc(sizeof(PCB));
+  PCB_p this = (PCB_p) malloc(sizeof(struct PCB));
   
   int error = ((!this) * PCB_INIT_ERROR);
   this->pc = 0;

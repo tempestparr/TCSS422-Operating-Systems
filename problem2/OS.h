@@ -39,5 +39,8 @@ void    queueCleanup(FIFOq_p, char*, int*);
 void    stackCleanup();
 int    createPCBs  	(FIFOq_p createQ, int *error);
 void    run         (unsigned int *pc, int *error);
+void scheduler(const int INTERRUPT, FIFOq_p createQ, FIFOq_p readyQ, PCB_p current, int* error);
+void dispatcher(FIFOq_p readyQ, PCB_p current, int* error);
+void isrTimer(FIFOq_p createQ, FIFOq_p readyQ, PCB_p current, int* error);
 
 #endif

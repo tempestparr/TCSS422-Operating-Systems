@@ -13,9 +13,8 @@
 #include "OS.h"
 
 int main(int argc, char** argv) {
-	srand(time(NULL));
-
-    startCPU();
+	
+        startCPU();
         
 //	printf("\nstarting PCB_test_main\n");
 //	PCB_test_main(0, NULL);
