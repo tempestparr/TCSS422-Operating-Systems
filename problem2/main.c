@@ -10,7 +10,7 @@
 #include "PCB.h"
 #include "FIFOq.h"
 //#include "PriorityQ.h"
-#include "CPU.h"
+#include "OS.h"
 
 int main(int argc, char** argv) {
 	srand(time(NULL));
