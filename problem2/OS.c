@@ -51,8 +51,12 @@ int mainLoopOS(int *error) {
     
     while(true) {
         exit = createPCBs(createQ, error);
+        
         scheduler(INTERRUPT_CREATE, createQ, readyQ, current, error);
-                
+        
+        PC = SysStack[SysPointer--];
+        SW = SysStack[SysPointer--];
+        
         if (current == NULL) {
             idl->state = running;
             run(&PC, error);
@@ -60,11 +64,13 @@ int mainLoopOS(int *error) {
         } else {
             run(&PC, error);
         }
+        
         SysStack[++SysPointer] = PC;
         SysStack[++SysPointer] = SW;
         
         isrTimer(createQ, readyQ, current, error);
-        
+	PC = SysStack[SysPointer--];
+	SW = SysStack[SysPointer--];        
         //other stuff for later
         
         if (*error) break;
@@ -138,7 +144,7 @@ int createPCBs(FIFOq_p createQ, int *error) {
         FIFOq_enqueuePCB(createQ, newPcb, error);
         processes_created++;
     }
-    
+    if (DEBUG) printf("PCBs all created\n");
     return processes_created >= MAX_PROCESSES ? -1 : 0;
 }
 
@@ -178,14 +184,19 @@ void scheduler(const int INTERRUPT, FIFOq_p createQ, FIFOq_p readyQ, PCB_p curre
 		current = idl;
 	}*/
 	
-	while (createQ->size != 0) {
-		PCB_p temp = PCB_construct(error);
-		temp = FIFOq_dequeue(createQ, error);
-		temp->state = ready;
-		FIFOq_enqueuePCB(readyQ, temp, error);
-		free(temp);
-	}
 
+        PCB_p temp;
+	while (!FIFOq_is_empty(createQ, error)) {
+            temp = FIFOq_dequeue(createQ, error);
+            temp->state = ready;
+            FIFOq_enqueuePCB(readyQ, temp, error);
+        }
+        temp = NULL;
+        
+        if (current == NULL) {
+            dispatcher(readyQ, current, error);
+        }
+        
 	switch (INTERRUPT) {
 		
 		case NO_INTERRUPT:
@@ -208,33 +219,36 @@ void scheduler(const int INTERRUPT, FIFOq_p createQ, FIFOq_p readyQ, PCB_p curre
 			dispatcher(readyQ, current, error);
 			break;
 	}
+        
+        //"housekeeping"
 }
 
 void dispatcher(FIFOq_p readyQ, PCB_p current, int* error) {
 	//save PC value into PCB
-	PCB_setPc (current, current->pc);
-
+	//PCB_setPc (current, current->pc);
+    
 	//dequeue the head of readyQueue
-	FIFOq_dequeue(readyQ, error);
+    current = FIFOq_dequeue(readyQ, error);
 
 	//change PCB's state to running point
-	PCB_setState (current, running);
+    PCB_setState (current, running);
 
 	//copy PCB's PC value to SystemStack
-	SysStack[++SysPointer] = current->pc;
+    SysStack[++SysPointer] = current->pc;
+    SysStack[++SysPointer] = current->sw;
 }
 
 void isrTimer(FIFOq_p createQ, FIFOq_p readyQ, PCB_p current, int* error) {
 	//variables for big PC and big SW
-	unsigned long bigPC = 0;
-	unsigned long bigSW = 0;
+	//unsigned long bigPC = 0;
+	//unsigned long bigSW = 0;
 
 	//change the state from running to interrupted
 	PCB_setState (current, interrupted);
 
 	//pop off SystemStack
 	//create temporary PCB
-	PCB_p tempHolder = PCB_construct(error);
+	//PCB_p tempHolder = PCB_construct(error);
 
 	//pop off node on SystemStack and make temporary PCB it
 //	tempHolder = FIFOq_dequeue(SysStack, error);
@@ -243,7 +257,7 @@ void isrTimer(FIFOq_p createQ, FIFOq_p readyQ, PCB_p current, int* error) {
 	SysStack[SysPointer--] = current->sw;
 
 	//delete this PCB
-	free(tempHolder);
+	//free(tempHolder);
 
 	//call Scheduler and pass timer interrupt parameter
 	scheduler(INTERRUPT_TIMER, createQ, readyQ, current, error);
@@ -278,11 +292,10 @@ void isrTimer(FIFOq_p createQ, FIFOq_p readyQ, PCB_p current, int* error) {
 	//PCB_setState (current, halted);
 
 	//Scheduler calls dispatcher
-	dispatcher(readyQ, current, error);
+	//dispatcher(readyQ, current, error);
 
 	//take PCB's PC and SW values and push them into SystemStack
-	SysStack[++SysPointer] = current->pc;
-	SysStack[++SysPointer] = current->sw;
+
 
 	//Scheduler does housekeeping
 	//does nothing
@@ -290,3 +303,4 @@ void isrTimer(FIFOq_p createQ, FIFOq_p readyQ, PCB_p current, int* error) {
 	//Interrupt pops SystemStack and assign SW and PC values to bigSW and bigPC
 	//
 }
+
