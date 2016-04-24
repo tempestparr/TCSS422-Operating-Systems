@@ -158,7 +158,7 @@ char * FIFOq_toString(FIFOq_p this, char *str, int *stz, int *error) {
                 unsigned long pid = PCB_getPid(pcb, NULL);
                 //alternate P1->P2-* scheme
 //                usedChars += snprintf(str + strlen(str), *stz - usedChars, "%cP%lu-", node == this->head? ' ' : '>', pid, PCB_toString);
-                usedChars += snprintf(str + strlen(str), *stz - usedChars, "> PID: 0x%04x%c-", pid, (newline++ % 5) ? ' ' : '\n');
+                usedChars += snprintf(str + strlen(str), *stz - usedChars, "> PID: 0x%04lx%c-", pid, (newline++ % 5) ? ' ' : '\n');
                 node = node->next_node;
             }
             usedChars += snprintf(str + strlen(str), *stz - usedChars, "* (Queue Count = %d)", this->size);
