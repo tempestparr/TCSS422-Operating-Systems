@@ -14,7 +14,7 @@
 
 int main(int argc, char** argv) {
 	
-        startCPU();
+        startOS();
         
 //	printf("\nstarting PCB_test_main\n");
 //	PCB_test_main(0, NULL);

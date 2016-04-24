@@ -111,7 +111,7 @@ void FIFOq_enqueuePCB(FIFOq_p this, PCB_p pcb, int* error) {
  * 
  * this is the FIFO queue we are dequeueing from
  * error is the error pointer
- * 
+ * Oq_p 
  * returns the pcb pointer that was the head
  */
 PCB_p FIFOq_dequeue(FIFOq_p this, int *error) {
@@ -146,16 +146,22 @@ PCB_p FIFOq_dequeue(FIFOq_p this, int *error) {
 char * FIFOq_toString(FIFOq_p this, char *str, int *stz, int *error) {
     int usedChars = 0;
     if (!is_null(this, error) && !is_null(str, error)) {
-        usedChars += snprintf(str, *stz - usedChars, "Count=%d:", this->size);
+        char pcbstr[PCB_TOSTRING_LEN];
+        usedChars += snprintf(str, *stz - usedChars, "Head:");
         if (this->head != NULL) {
             Node_p node = this->head;
+            usedChars += snprintf(str + strlen(str), *stz - usedChars, " %s -", PCB_toString(node->data, pcbstr, error));
+            node = node->next_node;
+            int newline = 5;
             while (node != NULL) {
                 PCB_p pcb = node->data;
                 unsigned long pid = PCB_getPid(pcb, NULL);
-                usedChars += snprintf(str + strlen(str), *stz - usedChars, "%cP%lu-", node == this->head? ' ' : '>', pid);
+                //alternate P1->P2-* scheme
+//                usedChars += snprintf(str + strlen(str), *stz - usedChars, "%cP%lu-", node == this->head? ' ' : '>', pid, PCB_toString);
+                usedChars += snprintf(str + strlen(str), *stz - usedChars, "> PID: 0x%04x%c-", pid, (newline++ % 5) ? ' ' : '\n');
                 node = node->next_node;
             }
-            usedChars += snprintf(str + strlen(str), *stz - usedChars, "*");
+            usedChars += snprintf(str + strlen(str), *stz - usedChars, "* (Queue Count = %d)", this->size);
         }
         *stz = *stz - usedChars;
         return str;

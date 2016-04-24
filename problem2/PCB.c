@@ -12,6 +12,7 @@
 #include "PCB.h"
 
 //struct and error defines originally here
+char *STATE[] = {"created", "ready", "running", "interrupted", "waiting", "halted"};
 
 /**
  * Returns a pcb pointer to heap allocation.
@@ -205,10 +206,11 @@ int PCB_setPc (PCB_p this, unsigned long pc) {
  */
 unsigned long PCB_getPc (PCB_p this, int *ptr_error) {
   int error = (this == NULL) * PCB_NULL_ERROR;
-  if(ptr_error != NULL) {
+
+  if (ptr_error != NULL) {
     *ptr_error += error;
   }
-  return error ? ~0 : this->pc; // TODO: write
+  return error ? -1 : this->pc; // TODO: write
 }
 
 /**
@@ -252,8 +254,8 @@ char * PCB_toString (PCB_p this, char *str, int *ptr_error) {
   int error = (this == NULL || str == NULL) * PCB_NULL_ERROR;
   if(!error) {
     str[0] = '\0';
-    const char * format = "PID: 0x%x, Priority 0x%x, state: %d, PC: 0x%04x";
-    snprintf (str, (size_t) PCB_TOSTRING_LEN - 1, format, this->pid, this->priority, this->state, this->pc);
+    const char * format = "PID: 0x%04x  PC: 0x%05x  State: %s  Priority 0x%x";
+    snprintf (str, (size_t) PCB_TOSTRING_LEN - 1, format, this->pid, this->pc, STATE[this->state], this->priority);
   }
   
   if(ptr_error != NULL) {

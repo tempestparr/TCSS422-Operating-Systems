@@ -1,3 +1,4 @@
+
 /*
  * Problem 2 - Scheduling Basics
  * TCSS 422 A Spring 2016
@@ -15,12 +16,13 @@
 #include "FIFOq.h"
 #include "PCB.h"
 
-#define DEBUG true
-#define EXIT_STATUS_MESSAGE true
+#define DEBUG false
+#define EXIT_STATUS_MESSAGE false
+#define OUTPUT true
+#define START_IDLE false
 #define NO_INTERRUPT 9999
-#define INTERRUPT_CREATE 6666
 #define INTERRUPT_TIMER 5555
-#define INTERRUT_IO 4444
+#define INTERRUPT_IO 4444
 
 #define MAX_PROCESSES 30
 #define SYSSIZE 256
@@ -30,17 +32,17 @@
 
 #define CPU_NULL_ERROR 71
 
-extern unsigned int SysStack[SYSSIZE];
+extern unsigned long SysStack[SYSSIZE];
 extern int SysPointer;
 
-void    startCPU    ();
+void    startOS    ();
 int     mainLoopOS  (int *error);
 void    queueCleanup(FIFOq_p, char*, int*);
 void    stackCleanup();
 int    createPCBs  	(FIFOq_p createQ, int *error);
-void    run         (unsigned int *pc, int *error);
-void scheduler(const int INTERRUPT, FIFOq_p createQ, FIFOq_p readyQ, PCB_p current, int* error);
-void dispatcher(FIFOq_p readyQ, PCB_p current, int* error);
-void isrTimer(FIFOq_p createQ, FIFOq_p readyQ, PCB_p current, int* error);
+void    run         (unsigned long *pc, int *error);
+void scheduler(const int INTERRUPT, FIFOq_p createQ, FIFOq_p readyQ, int* error);
+void dispatcher(FIFOq_p readyQ, int* error);
+void isrTimer(FIFOq_p createQ, FIFOq_p readyQ, int* error);
 
 #endif
