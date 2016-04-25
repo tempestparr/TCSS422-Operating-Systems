@@ -254,7 +254,7 @@ char * PCB_toString (PCB_p this, char *str, int *ptr_error) {
   int error = (this == NULL || str == NULL) * PCB_NULL_ERROR;
   if(!error) {
     str[0] = '\0';
-    const char * format = "PID: 0x%04x  PC: 0x%05x  State: %s  Priority 0x%x";
+    const char * format = "PID: 0x%04lx  PC: 0x%05lx  State: %s  Priority 0x%x";
     snprintf (str, (size_t) PCB_TOSTRING_LEN - 1, format, this->pid, this->pc, STATE[this->state], this->priority);
   }
   
