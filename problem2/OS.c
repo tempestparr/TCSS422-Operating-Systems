@@ -8,6 +8,8 @@
 #include "PCB.h"
 #include "FIFOq.h"
 
+#define WRITE_TO_FILE true
+
 /*extern global declarations for system stack*/
 unsigned long SysStack[SYSSIZE];
 int SysPointer;
@@ -21,6 +23,11 @@ PCB_p idl;
  * any errors encountered.
  */
 void startOS() {
+    
+    if(WRITE_TO_FILE) {
+        freopen("scheduleTrace.txt", "w", stdout);
+    }
+    
     srand(time(NULL)); // seed random with current time
     int base_error = 0;
     SysPointer = 0; //points at next unassigned stack item; 0 is empty
