@@ -12,7 +12,13 @@
 //#include "PriorityQ.h"
 #include "OS.h"
 
+#define WRITE_TO_FILE true
+
 int main(int argc, char** argv) {
+	
+	if(WRITE_TO_FILE) {
+		freopen("scheduleTrace.txt", "w", stdout);
+	}
 	
         startOS();
         
